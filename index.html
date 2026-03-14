@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>BillCatcher Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white p-6">
+
+<h1 class="text-3xl font-bold mb-6">BillCatcher Dashboard</h1>
+<div class="mb-6">
+<label class="text-gray-400">Cloud Provider</label>
+
+<select class="bg-gray-800 text-white p-2 rounded-lg ml-2">
+<option>Microsoft Azure</option>
+<option>Amazon Web Services</option>
+<option>Google Cloud</option>
+</select>
+
+</div>
+<div class="mb-6">
+<label class="text-gray-400">Monthly Budget ($)</label>
+
+<input 
+type="number" 
+id="budgetInput"
+value="1500"
+class="bg-gray-800 text-white p-2 rounded-lg ml-2 w-32"
+/>
+
+<button 
+onclick="updateBudget()" 
+class="bg-blue-600 px-3 py-2 rounded-lg ml-2"
+>
+Set Budget
+</button>
+</div>
+
+<div class="grid grid-cols-1 gap-6">
+  <div class="bg-gray-800 p-6 rounded-2xl shadow">
+<h2 class="text-lg mb-4">Weekly Cloud Spend</h2>
+<canvas id="spendChart"></canvas>
+</div>
+
+<div class="bg-gray-800 p-6 rounded-2xl shadow">
+<h2 class="text-lg mb-2">Current Cloud Spend</h2>
+<div class="mt-4">
+  <label class="text-gray-400 text-sm">Set Monthly Budget</label>
+  <input 
+    id="budgetInput"
+    type="number"
+    placeholder="Enter budget e.g 2000"
+    class="w-full mt-1 p-2 rounded bg-gray-800 text-white"
+  >
+</div>
+
+<div id="spendAmount" class="text-4xl font-bold text-green-400">
+$0
+</div>
+
+<p class="text-gray-400 mt-2">
+Today's Microsoft Cloud usage
+</p>
+</div>
+
+<div class="bg-gray-800 p-6 rounded-2xl shadow">
+
+<div class="w-full bg-gray-700 rounded-full h-4">
+  <div id="budgetBar" class="bg-red-500 h-4 rounded-full" style="width:0%"></div>
+</div>
+
+<p id="percentText" class="text-gray-400 mt-3">
+Monthly budget usage
+</p>
+<p id="budgetStatus" class="mt-2 text-green-400">
+You are within budget
+</p>
+
+
+<div class="w-full bg-gray-700 rounded-full h-4">
+<div id="budgetBar" class="bg-red-500 h-4 rounded-full" style="width:0%"></div>
+</div>
+
+
+
+</div>
+<p id="budgetStatus" class="text-green-400 mt-2"></p>
+
+<div id="alertBox" class="hidden bg-red-600 text-white p-4 rounded-xl mt-6">
+⚠ Budget Warning: You have used over 80% of your cloud budget
+</div>
+
+</div>
+
+<script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+</html>
+
