@@ -1,76 +1,65 @@
 let spend = 0;
-let budget = 1500;
+let budget = 0;
 
-
-function updateDashboard(){
-
-let percent = (spend / budget) * 100;
-
-document.getElementById("spendAmount").innerText = "$" + spend;
-
-let barPercent = Math.min(percent,100);
-document.getElementById("budgetBar").style.width = barPercent + "%";
-
-if(percent > 100){
-document.getElementById("budgetStatus").innerText = "⚠ Budget exceeded";
-document.getElementById("budgetStatus").style.color = "red";
+function setBudget() {
+  budget = Number(document.getElementById("budgetInput").value);
+  updateDashboard();
 }
 
+function updateDashboard() {
+
+  document.getElementById("spend").innerText = "$" + spend;
+
+  if (budget > 0) {
+
+    let percent = (spend / budget) * 100;
+
+    if (percent >= 100) {
+      document.getElementById("budgetStatus").innerText = "Over Budget!";
+      document.getElementById("budgetStatus").style.color = "red";
+    }
+
+    else if (percent >= 80) {
+      document.getElementById("budgetStatus").innerText = "Warning: Near Budget";
+      document.getElementById("budgetStatus").style.color = "orange";
+    }
+
+    else {
+      document.getElementById("budgetStatus").innerText = "You are within budget";
+      document.getElementById("budgetStatus").style.color = "green";
+    }
+
+  }
+
 }
 
-setInterval(function(){
+function simulateSpend() {
 
-spend = spend + Math.floor(Math.random()*5);
+  spend = spend + Math.floor(Math.random() * 20);
 
-let spike = Math.floor(Math.random()*100);
+  updateDashboard();
 
-if(spike > 85){
-document.getElementById("budgetStatus").innerText = "⚠ Cost spike detected today";
 }
 
-updateDashboard();
+setInterval(simulateSpend, 4000);
 
-},2000);
+const ctx = document.getElementById("spendChart");
 
+new Chart(ctx, {
+  type: "line",
 
+  data: {
+    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
 
-const ctx = document.getElementById('spendChart').getContext('2d');
+    datasets: [{
+      label: "Cloud Spend ($)",
+      data: [120, 200, 150, 300, 250, 180, 220],
+      borderWidth: 3
+    }]
+  },
 
-const spendChart = new Chart(ctx, {
-type: 'line',
-data: {
-labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-datasets: [{
-label: 'Cloud Spend ($)',
-data: [1100,1200,1250,1300,1400,1450,1500],
-borderColor: '#4ade80',
-backgroundColor: 'rgba(74,222,128,0.2)',
-tension: 0.4
-}]
-},
-options: {
-plugins:{
-legend:{
-display:false
-}
-}
-}
+  options: {
+    responsive: true
+  }
 });
-
-
-
-document.getElementById("setBudgetBtn").addEventListener("click", function(){
-
-let newBudget = document.getElementById("budgetInput").value
-if(newBudget){
-budget = Number(newBudget);
-localStorage.setItem("budget", budget);
 updateDashboard();
-}
-
-});
-window.onload = function(){
-
-document.getElementById("budgetInput").value = budget;
-
-}
