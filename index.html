@@ -1,96 +1,81 @@
-<div style="text-align:center; margin-bottom:30px;">
-  <h2>BillCatcher</h2>
-  <p>Stop Cloud Bills Before They Explode</p>
-  <p>Track Azure, AWS and Google Cloud spending in one place.</p>
-</div>                         <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-<title>BillCatcher Dashboard</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>BillCatcher</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-<style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-body{
-background:#0f172a;
-color:white;
-font-family:Arial;
-padding:20px;
-}
 
-.card{
-background:#1e293b;
-padding:20px;
-border-radius:12px;
-margin-bottom:20px;
-}
+<link rel="stylesheet" href="style.css">
 
-input,button,select{
-padding:10px;
-border-radius:6px;
-border:none;
-margin-top:10px;
-}
-
-button{
-background:#2563eb;
-color:white;
-}
-
-#spend{
-font-size:32px;
-color:#22c55e;
-}
-
-</style>
 </head>
 
 <body>
 
-<h1>BillCatcher Dashboard</h1>
+<h1>BillCatcher Cloud Cost Dashboard</h1>
+<p class="description">
+Monitor and control your cloud spending in real time. Set budgets, track usage, and receive alerts before costs exceed your limit.
+</p>
 
-<div class="card">
+<section>
 
-<label>Cloud Provider</label>
-<select>
-<option>Microsoft Azure</option>
-<option>AWS</option>
-<option>Google Cloud</option>
-</select>
+<h2>Set Budget</h2>
 
-<br>
+<input id="budgetInput" type="number" placeholder="Enter monthly budget">
 
-<label>Monthly Budget</label><br>
+<button onclick="setBudget()">Save Budget</button>
 
-<input id="budgetInput" type="number" placeholder="Enter budget">
+<p id="budgetDisplay">Budget: Not set</p>
 
-<button onclick="setBudget()">Set Budget</button>
-
-</div>
+</section>
 
 
-<div class="card">
+<section>
 
-<h3>Weekly Cloud Spend</h3>
+<h2>Add Cloud Spend</h2>
 
-<canvas id="spendChart"></canvas>
+<input id="spendInput" type="number" placeholder="Enter spend">
 
-</div>
+<button onclick="addSpend()">Add Spend</button>
+
+</section>
 
 
-<div class="card">
+<section>
 
-<h3>Current Cloud Spend</h3>
+<h2>Current Spend</h2>
 
-<p id="spend">$0</p>
+<h3 id="totalSpend">$0</h3>
 
-<p id="budgetStatus">You are within budget</p>
+<p id="weeklySpend">Weekly Spend: $0</p>
 
-</div>
+</section>
+
+
+<section>
+
+<h2>Alerts</h2>
+
+<div id="alertBox"></div>
+
+</section>
+
+
+<section>
+
+<h2>Spend History</h2>
+
+<ul id="history"></ul>
+
+</section>
+
 
 <script src="app.js"></script>
 
 </body>
 </html>
+
 
 
