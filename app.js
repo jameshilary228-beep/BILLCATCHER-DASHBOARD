@@ -1,65 +1,147 @@
-let spend = 0;
+alert("app.js connected");          const supabaseUrl =https//dcukvzsmlnmjvscyjjrp.supabase.co 
+const supabaseKey = sb_publishable_ViJZqXoZCScCHK327ZQigQ_Bs8MXQ8M
+
+
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
 let budget = 0;
 
-function setBudget() {
-  budget = Number(document.getElementById("budgetInput").value);
-  updateDashboard();
-}
 
-function updateDashboard() {
 
-  document.getElementById("spend").innerText = "$" + spend;
+function setBudget(){
 
-  if (budget > 0) {
+const input = document.getElementById("budgetInput").value;
 
-    let percent = (spend / budget) * 100;
+budget = Number(input);
 
-    if (percent >= 100) {
-      document.getElementById("budgetStatus").innerText = "Over Budget!";
-      document.getElementById("budgetStatus").style.color = "red";
-    }
+localStorage.setItem("budget", budget);
 
-    else if (percent >= 80) {
-      document.getElementById("budgetStatus").innerText = "Warning: Near Budget";
-      document.getElementById("budgetStatus").style.color = "orange";
-    }
-
-    else {
-      document.getElementById("budgetStatus").innerText = "You are within budget";
-      document.getElementById("budgetStatus").style.color = "green";
-    }
-
-  }
+document.getElementById("budgetDisplay").innerText = "Budget: $" + budget;
 
 }
 
-function simulateSpend() {
 
-  spend = spend + Math.floor(Math.random() * 20);
 
-  updateDashboard();
+async function addSpend(){
+
+const amount = Number(document.getElementById("spendInput").value);
+
+if(!amount) return alert("Enter spend amount");
+
+await supabase
+.from("spend")
+.insert([{ amount: amount }]);
+
+document.getElementById("spendInput").value="";
+
+loadDashboard();
 
 }
 
-setInterval(simulateSpend, 4000);
 
-const ctx = document.getElementById("spendChart");
 
-new Chart(ctx, {
-  type: "line",
+async function loadDashboard(){
 
-  data: {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+const { data } = await supabase
+.from("spend")
+.select("*")
+.order("id",{ascending:false});
 
-    datasets: [{
-      label: "Cloud Spend ($)",
-      data: [120, 200, 150, 300, 250, 180, 220],
-      borderWidth: 3
-    }]
-  },
+let total = 0;
 
-  options: {
-    responsive: true
-  }
+let weekTotal = 0;
+
+let list = "";
+
+const today = new Date();
+const weekAgo = new Date();
+weekAgo.setDate(today.getDate()-7);
+
+
+
+data.forEach(row=>{
+
+total += row.amount;
+
+const date = new Date(row.created_at);
+
+if(date > weekAgo){
+
+weekTotal += row.amount;
+
+}
+
+list += `<li>$${row.amount} - ${date.toLocaleDateString()}</li>`;
+
 });
-updateDashboard();
+
+
+document.getElementById("totalSpend").innerText="$"+total;
+
+document.getElementById("weeklySpend").innerText="Weekly Spend: $"+weekTotal;
+
+document.getElementById("history").innerHTML=list;
+
+checkAlerts(total);
+
+}
+
+
+
+function checkAlerts(total){
+
+if(!budget){
+
+budget = Number(localStorage.getItem("budget"));
+
+}
+
+if(!budget) return;
+
+
+
+let percent = (total/budget)*100;
+
+if(percent>=100){
+
+document.getElementById("alertBox").innerText="⚠ Budget Exceeded";
+
+}
+
+else if(percent>=80){
+
+document.getElementById("alertBox").innerText="⚠ 80% Budget Used";
+
+}
+
+else{
+
+document.getElementById("alertBox").innerText="Budget Safe";
+
+}
+
+}
+
+
+
+function loadBudget(){
+
+const saved = localStorage.getItem("budget");
+
+if(saved){
+
+budget = Number(saved);
+
+document.getElementById("budgetDisplay").innerText="Budget: $"+budget;
+
+}
+
+}
+
+
+
+loadBudget();
+
+loadDashboard();
+
+
