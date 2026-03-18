@@ -1,81 +1,164 @@
-<!DOCTYPE html>
-<html>
+<!DOCT<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>BillCatcher PRO | Enterprise SaaS</title>
+    
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/732/732190.png">
+    
+    <meta property="og:title" content="BillCatcher PRO">
+    <meta property="og:description" content="Track every $1 spent by staff in real-time. Global Enterprise Edition.">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/732/732190.png">
+    <meta name="description" content="Stop the Money Leak. Track every $1 spent by staff in real-time.">
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { --bg: #020617; --card: #0f172a; --primary: #6366f1; --accent: #10b981; --text: #f8fafc; --danger: #ef4444; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+        .hidden { display: none !important; }
+        
+        /* --- SHINING & COLOR-CHANGING LOGO ANIMATIONS --- */
+        @keyframes colorShift {
+            0%, 100% { background-color: #6366f1; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+            33% { background-color: #ec4899; box-shadow: 0 0 20px rgba(236, 72, 153, 0.4); }
+            66% { background-color: #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+        }
+        @keyframes shineMove {
+            0% { left: -100%; }
+            20% { left: 100%; }
+            100% { left: 100%; }
+        }
 
-<title>BillCatcher</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+        .logo-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; text-align: center; }
+        
+        .logo-box {
+            width: 75px; height: 75px; border-radius: 22px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+            animation: colorShift 8s infinite ease-in-out;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        .logo-box::after {
+            content: ""; position: absolute; top: 0; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-25deg); animation: shineMove 4s infinite;
+        }
+        .logo-b-text { font-size: 42px; font-weight: 900; color: white; z-index: 2; font-family: 'Arial Black', sans-serif; }
+        .web-desc-text { color: #94a3b8; font-size: 0.85rem; margin-top: 15px; line-height: 1.5; max-width: 280px; }
+        /* ----------------------------------------------- */
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 25px; border-radius: 50px; font-size: 0.9rem; z-index: 3000; transition: 0.3s; opacity: 0; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        #toast.show { opacity: 1; bottom: 40px; }
 
-
-<link rel="stylesheet" href="style.css">
-
+        .card { background: var(--card); padding: 25px; border-radius: 15px; margin: 15px; border: 1px solid #1e293b; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #1e293b; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; outline: none; }
+        .btn { width: 100%; padding: 12px; background: var(--primary); border: none; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        .pass-box { position: relative; }
+        .pass-box i { position: absolute; right: 15px; top: 25px; color: #94a3b8; cursor: pointer; }
+        
+        nav { display: flex; justify-content: space-around; background: var(--card); padding: 15px; border-bottom: 1px solid #1e293b; position: sticky; top: 0; z-index: 100; }
+        .log-item { padding: 15px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
+        
+        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:2000; backdrop-filter: blur(4px); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .stat-card { background: #1e293b; padding: 10px; border-radius: 10px; }
+        .export-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px; border-radius: 5px; font-size: 0.7rem; cursor: pointer; font-weight: bold; }
+    </style>
 </head>
-
 <body>
 
-<h1>BillCatcher Cloud Cost Dashboard</h1>
-<p class="description">
-Monitor and control your cloud spending in real time. Set budgets, track usage, and receive alerts before costs exceed your limit.
-</p>
+    <div id="toast">Message here</div>
 
-<section>
+    <div id="budget-modal" class="modal hidden">
+        <div class="card" style="width:85%; max-width:350px;">
+            <h3 style="margin-top:0">Set Monthly Limit</h3>
+            <input type="number" id="new-limit" placeholder="Amount ($)">
+            <button class="btn" onclick="updateLimit()">Save Limit</button>
+            <p onclick="closeModal()" style="text-align:center; color:#94a3b8; cursor:pointer; margin-top:15px;">Cancel</p>
+        </div>
+    </div>
 
-<h2>Set Budget</h2>
+    <div id="auth-screen" class="card" style="margin-top:40px;">
+        
+        <div class="logo-container">
+            <div class="logo-box">
+                <span class="logo-b-text">B</span>
+            </div>
+            <h2 id="auth-title" style="margin: 15px 0 5px 0;">BillCatcher <span style="color:var(--primary)">PRO</span></h2>
+            <p class="web-desc-text">Stop the "Money Leak" in your business. Track every $1 spent by staff in real-time.</p>
+        </div>
 
-<input id="budgetInput" type="number" placeholder="Enter monthly budget">
+        <input type="email" id="email" placeholder="Business Email">
+        <div class="pass-box">
+            <input type="password" id="pwd" placeholder="Password">
+            <i class="fa-solid fa-eye" id="eye" onclick="togglePass()"></i>
+        </div>
+        <button class="btn" id="auth-btn" onclick="handleAuth()">Enter Dashboard</button>
+        <div style="text-align: center; margin-top: 25px;">
+            <p id="toggle-text" onclick="toggleAuth()" style="font-size: 0.85rem; color: var(--accent); cursor:pointer;">New Company? Create SaaS Account</p>
+            <p onclick="forgotPass()" style="font-size: 0.8rem; color: #94a3b8; cursor:pointer; margin-top:18px;">Forgot Password? Get Help</p>
+        </div>
+    </div>
 
-<button onclick="setBudget()">Save Budget</button>
+    <div id="app-screen" class="hidden">
+        <nav>
+            <span onclick="showPage('dash')">Dashboard</span>
+            <span onclick="showPage('log')">Add Bill</span>
+            <span onclick="logout()" style="color: var(--danger);">Logout</span>
+        </nav>
 
-<p id="budgetDisplay">Budget: Not set</p>
+        <div id="dash-page" class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div id="status-badge" style="padding: 4px 10px; border-radius: 20px; font-size: 0.6rem; font-weight: bold;">SYNCING...</div>
+                <button onclick="openModal()" style="background:none; border:1px solid #334155; color:white; padding:5px 10px; border-radius:5px; font-size:0.6rem;">Set Limit</button>
+            </div>
+            
+            <h1 id="total-val" style="font-size:2.8rem; margin:5px 0;">$ 0</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <small style="color:#94a3b8; font-size:0.6rem;">THIS WEEK</small>
+                    <div id="weekly-val" style="font-weight:bold; font-size:0.9rem;">$ 0</div>
+                </div>
+                <div class="stat-card">
+                    <small style="color:#94a3b8; font-size:0.6rem;">THIS MONTH</small>
+                    <div id="monthly-val" style="font-weight:bold; font-size:0.9rem;">$ 0</div>
+                </div>
+            </div>
 
-</section>
+            <div style="width: 100%; height: 6px; background: #1e293b; border-radius: 10px; margin: 10px 0; overflow: hidden;">
+                <div id="budget-progress" style="width: 0%; height: 100%; transition: 0.5s; background: var(--accent);"></div>
+            </div>
 
+            <p id="limit-info" style="font-size:0.75rem; color:#94a3b8; margin-top:0;"></p>
+            <hr style="border:0.5px solid #1e293b; margin:20px 0;">
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h4 style="margin:0; font-size:0.8rem; color:var(--accent)">LATEST HISTORY</h4>
+                <button class="export-btn" onclick="exportData()"><i class="fa-solid fa-file-export"></i> Export</button>
+            </div>
+            
+            <div id="logs-list">Syncing ledger...</div>
+        </div>
 
-<section>
+        <div id="log-page" class="card hidden">
+            <h3>Log Bill</h3>
+            <input type="text" id="staff" placeholder="Staff Name">
+            <input type="text" id="item" placeholder="Purpose">
+            <select id="curr">
+                <option value="$">$ Dollar</option>
+                <option value="₦">₦ Naira</option>
+                <option value="£">£ Pounds</option>
+            </select>
+            <input type="number" id="amt" placeholder="Amount">
+            <button class="btn" style="background:var(--accent)" onclick="saveBill()">Sync to Cloud</button>
+        </div>
+    </div>
 
-<h2>Add Cloud Spend</h2>
-
-<input id="spendInput" type="number" placeholder="Enter spend">
-
-<button onclick="addSpend()">Add Spend</button>
-
-</section>
-
-
-<section>
-
-<h2>Current Spend</h2>
-
-<h3 id="totalSpend">$0</h3>
-
-<p id="weeklySpend">Weekly Spend: $0</p>
-
-</section>
-
-
-<section>
-
-<h2>Alerts</h2>
-
-<div id="alertBox"></div>
-
-</section>
-
-
-<section>
-
-<h2>Spend History</h2>
-
-<ul id="history"></ul>
-
-</section>
-
-
-<script src="app.js"></script>
-
+    <script src="app.js"></script>
 </body>
-</html>
-
-
-
+</html>￼Enter
