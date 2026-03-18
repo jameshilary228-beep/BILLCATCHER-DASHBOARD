@@ -1,4 +1,4 @@
-<!DOCT<!DOCTYPE html>
+here<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -67,6 +67,9 @@
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
         .stat-card { background: #1e293b; padding: 10px; border-radius: 10px; }
         .export-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px; border-radius: 5px; font-size: 0.7rem; cursor: pointer; font-weight: bold; }
+        
+        /* Style for the trusted text */
+        .trust-text { text-align: center; margin-top: 15px; font-size: 0.75rem; color: #64748b; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -98,6 +101,12 @@
             <i class="fa-solid fa-eye" id="eye" onclick="togglePass()"></i>
         </div>
         <button class="btn" id="auth-btn" onclick="handleAuth()">Enter Dashboard</button>
+        
+        <p class="trust-text">
+            <i class="fa-solid fa-shield-halved" style="color: var(--accent); margin-right: 4px;"></i> 
+            Trusted by 200+ companies
+        </p>
+
         <div style="text-align: center; margin-top: 25px;">
             <p id="toggle-text" onclick="toggleAuth()" style="font-size: 0.85rem; color: var(--accent); cursor:pointer;">New Company? Create SaaS Account</p>
             <p onclick="forgotPass()" style="font-size: 0.8rem; color: #94a3b8; cursor:pointer; margin-top:18px;">Forgot Password? Get Help</p>
@@ -161,4 +170,4 @@
 
     <script src="app.js"></script>
 </body>
-</html>￼Enter
+</html>
