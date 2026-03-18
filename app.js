@@ -194,5 +194,5 @@ function logout() {
     account.deleteSession('current').then(() => location.reload()); 
 }
 
-account.get().then(startApp).catch(() => {});
+account.get().then(startApp).catch(() => {});   
 
