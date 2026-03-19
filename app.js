@@ -26,14 +26,13 @@ function notify(msg, color = "#6366f1") {
 function togglePass() {
     const p = document.getElementById('pwd');
     const e = document.getElementById('eye');
+    if (!p || !e) return;
     if (p.type === 'password') {
         p.type = 'text';
-        e.classList.remove('fa-eye');
-        e.classList.add('fa-eye-slash');
+        e.classList.replace('fa-eye', 'fa-eye-slash');
     } else {
         p.type = 'password';
-        e.classList.remove('fa-eye-slash');
-        e.classList.add('fa-eye');
+        e.classList.replace('fa-eye-slash', 'fa-eye');
     }
 }
 
@@ -161,9 +160,7 @@ async function fetchData() {
     } catch (err) { console.error(err); }
 }
 
-// FIX 1: PROFESSIONAL DELETE (NO GITHUB NAME SHOWING)
 async function deleteBill(id) {
-    // Using custom prompt for better browser compatibility
     let confirmDelete = prompt("Type 'PURGE' to delete this record permanently:");
     if(!confirmDelete || confirmDelete.toUpperCase() !== 'PURGE') return;
 
@@ -175,7 +172,6 @@ async function deleteBill(id) {
     } catch (err) { notify(err.message, "#ef4444"); }
 }
 
-// FIX 2: EXPORT TO CSV LOGIC (NOW WORKING)
 async function exportData() {
     try {
         notify("Generating Report...");
@@ -224,8 +220,17 @@ function logout() {
     account.deleteSession('current').then(() => location.reload()); 
 }
 
-// FIX 3: GLOBAL BROWSER COMPATIBILITY CHECK
-account.get().then(startApp).catch((err) => {
-    console.log("No session. Please login.");
+// --- 6. WIRING (THE FIX) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const authBtn = document.getElementById('auth-btn');
+    if (authBtn) authBtn.addEventListener('click', handleAuth);
+
+    const eyeIcon = document.getElementById('eye');
+    if (eyeIcon) eyeIcon.addEventListener('click', togglePass);
+
+    const toggleLink = document.getElementById('toggle-text');
+    if (toggleLink) toggleLink.addEventListener('click', toggleAuth);
 });
-￼Enter
+
+account.get().then(startApp).catch(() => console.log("Login required."));
+
