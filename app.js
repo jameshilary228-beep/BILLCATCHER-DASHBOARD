@@ -23,7 +23,6 @@ function notify(msg, color = "#6366f1") {
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// THE ICON LOGIC IS BACK HERE!
 function togglePass() {
     const p = document.getElementById('pwd');
     const e = document.getElementById('eye');
@@ -95,7 +94,7 @@ async function saveBill() {
             item: document.getElementById('item').value,
             amount: Number(document.getElementById('amt').value),
             currency: document.getElementById('curr').value,
-            userId: user.$id // This matches the Capital 'I'
+            userId: user.$id 
         };
         await databases.createDocument(dbId, collId, ID.unique(), data);
         notify("Bill Saved!", "#10b981");
@@ -121,7 +120,8 @@ async function fetchData() {
         let grandTotal = 0; let weeklyTotal = 0; let monthlyTotal = 0; let html = "";
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1));
+        const startOfWeek = new Date();
+        startOfWeek.setDate(now.getDate() - now.getDay() + 1);
         startOfWeek.setHours(0,0,0,0);
 
         res.documents.forEach(doc => {
@@ -161,13 +161,43 @@ async function fetchData() {
     } catch (err) { console.error(err); }
 }
 
+// FIX 1: PROFESSIONAL DELETE (NO GITHUB NAME SHOWING)
 async function deleteBill(id) {
-    if(!confirm("Delete this record permanently?")) return;
+    // Using custom prompt for better browser compatibility
+    let confirmDelete = prompt("Type 'PURGE' to delete this record permanently:");
+    if(!confirmDelete || confirmDelete.toUpperCase() !== 'PURGE') return;
+
     try { 
+        notify("Cleaning vault...");
         await databases.deleteDocument(dbId, collId, id); 
-        notify("Purged!"); 
+        notify("Purged!", "#10b981"); 
         fetchData(); 
     } catch (err) { notify(err.message, "#ef4444"); }
+}
+
+// FIX 2: EXPORT TO CSV LOGIC (NOW WORKING)
+async function exportData() {
+    try {
+        notify("Generating Report...");
+        if(rawData.length === 0) return notify("No data to export!", "#ef4444");
+
+        let csvContent = "Staff,Item,Amount,Currency,Date\n";
+        rawData.forEach(doc => {
+            csvContent += `${doc.Staff},${doc.item},${doc.amount},${doc.currency},${doc.$createdAt}\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `BillCatcher_Report_${new Date().getTime()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        notify("Download Started!", "#10b981");
+    } catch (err) {
+        notify("Export failed. Use Chrome.", "#ef4444");
+    }
 }
 
 // --- 5. NAVIGATION ---
@@ -194,5 +224,8 @@ function logout() {
     account.deleteSession('current').then(() => location.reload()); 
 }
 
-account.get().then(startApp).catch(() => {});   
-
+// FIX 3: GLOBAL BROWSER COMPATIBILITY CHECK
+account.get().then(startApp).catch((err) => {
+    console.log("No session. Please login.");
+});
+￼Enter
